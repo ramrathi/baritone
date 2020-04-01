@@ -9,26 +9,29 @@ import time
 import wave
 from .utils import youtube as yt
 import requests
-from .utils import stt,convert,garbagecollector
+from .utils import stt,convert,garbagecollector,database as db
 
 dirname = os.path.dirname(__file__)
 
 def process_audio(in_data, frame_count, time_info, status):
-    global text_so_far
-    data16 = np.frombuffer(in_data, dtype=np.int16)
-    model.feedAudioContent(context, data16)
-    text = model.intermediateDecode(context)
-    if text != text_so_far:
-        print('Interim text = {}'.format(text))
-        text_so_far = text
-    return (in_data, pyaudio.paContinue)
+	global text_so_far
+	data16 = np.frombuffer(in_data, dtype=np.int16)
+	model.feedAudioContent(context, data16)
+	text = model.intermediateDecode(context)
+	if text != text_so_far:
+		print('Interim text = {}'.format(text))
+		text_so_far = text
+	return (in_data, pyaudio.paContinue)
 
 def validate_url(url):
-	request = requests.get(url)
-	if request.status_code == 200:
-	    return True
-	else:
-	    return False
+	try:
+		request = requests.get(url)
+		if request.status_code == 200:
+			return True
+		else:
+			return False
+	except:
+		return False
 
 def isYoutube(path):
 	return not ('https://www.youtube.com/watch?v=' in path)
@@ -38,11 +41,14 @@ def pipeline(path,file_type='local'):
 		if not validate_url(path) or isYoutube(path):
 			return ("Page does not exist", False)
 		# Need to add function to check validity of youtube url
+		# Checking in cache
+		text,status = db.check_cache(path)
+		if(status == True):
+			return (text,status)
 		# Now checking for captions
-		# cc,status = yt.get_youtube_cc(path)
-		status = False
-		print("Could not get captions")
+		cc,status = yt.get_youtube_cc(path)
 		if status == True:
+			db.cache(path,cc)
 			return (cc,True)
 		# Else send to voice to text conversion
 		v_id,status = yt.get_youtube_audio(path)
@@ -52,10 +58,11 @@ def pipeline(path,file_type='local'):
 		if status == True:
 			error,status = stt.speech_to_text(dirname+'/temp/'+v_id+'.wav')
 			if status:
-				print(error)
+				text = error
 				garbagecollector.dump(dirname + '/temp/'+v_id+'.mp3')
 				garbagecollector.dump(dirname+'/temp/'+v_id+'.wav')
-				return (error,True)
+				db.cache(path,text)
+				return (text,True)
 			else:
 				return (error,False)
 		else:
