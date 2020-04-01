@@ -9,9 +9,10 @@ import time
 import wave
 from .utils import youtube as yt
 import requests
-from .utils import stt,convert
-dirname = os.path.dirname(__file__)
+from .utils import stt,convert,garbagecollector
 
+
+dirname = os.path.dirname(__file__)
 
 def process_audio(in_data, frame_count, time_info, status):
     global text_so_far
@@ -39,8 +40,8 @@ def pipeline(path,file_type='local'):
 			return ("Page does not exist", False)
 		# Need to add function to check validity of youtube url
 		# Now checking for captions
-		cc,status = yt.get_youtube_cc(path)
-		# status = False
+		# cc,status = yt.get_youtube_cc(path)
+		status = False
 		print("Could not get captions")
 		if status == True:
 			return (cc,True)
@@ -53,6 +54,8 @@ def pipeline(path,file_type='local'):
 		if status == True:
 			error,status = stt.speech_to_text(dirname+'/temp/'+v_id+'.wav')
 			if status:
+				print(error)
+				garbagecollector.dump(dirname + '/temp/'+v_id+'.mp3')
 				return (error,True)
 			else:
 				return (error,False)

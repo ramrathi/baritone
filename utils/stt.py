@@ -3,6 +3,8 @@ import scipy.io.wavfile as wav
 import sys
 import os
 import wave
+import baritone.utils.garbagecollector as gc
+
 sample_rate = 16000
 beam_width = 500
 lm_alpha = 0.75
@@ -16,7 +18,6 @@ alphabet = dirname+"/models/alphabet.txt"
 langauage_model = dirname+"/models/lm.binary"
 trie = dirname+"/models/trie"
 
-# ds = Model(dirname+'/models/output_graph.pbmm',500)
 ds = Model(model_name,beam_width)
 try:
 	ds.enableDecoderWithLM(langauage_model, trie, lm_alpha, lm_beta)
@@ -25,8 +26,7 @@ except:
 
 def downsampleWav(src, dst, inrate=44100, outrate=sample_rate, inchannels=2, outchannels=1):
     if not os.path.exists(src):
-        print('Source not found!')
-        return False
+        return ('Source not found!',False)
 
     if not os.path.exists(os.path.dirname(dst)):
         os.makedirs(os.path.dirname(dst))
@@ -35,9 +35,7 @@ def downsampleWav(src, dst, inrate=44100, outrate=sample_rate, inchannels=2, out
         s_read = wave.open(src, 'r')
         s_write = wave.open(dst, 'w')
     except Exception as e:
-        print(e)
-        print('Failed to open files!')
-        return False
+        return ('Failed to open files!: '+e, False)
 
     n_frames = s_read.getnframes()
     data = s_read.readframes(n_frames)
@@ -47,37 +45,34 @@ def downsampleWav(src, dst, inrate=44100, outrate=sample_rate, inchannels=2, out
         if outchannels == 1:
             converted = audioop.tomono(converted[0], 2, 1, 0)
     except:
-        print('Failed to downsample wav')
-        return False
-
+        return ('Failed to downsample wav',False)
     try:
         s_write.setparams((outchannels, 2, outrate, 0, 'NONE', 'Uncompressed'))
         s_write.writeframes(converted)
     except:
-        print('Failed to write wav')
-        return False
-
+        return ('Failed to write wav',False)
     try:
         s_read.close()
         s_write.close()
     except:
-        print ('Failed to close wav files')
-        return False
+        return ('Failed to close wav files',False)
 
-    return True
+    return ("Success",True)
 
 def speech_to_text(path):
-	print(path)
 	if os.path.isfile(path):
 		try:
 			fs, audio = wav.read(path)
 			processed_data = ds.stt(audio)
-			print(processed_data)
+			try:
+				gc.dump(path)
+				print("Deleted")
+			except Exception as e:
+				print(e)
+
 			return (processed_data,True)	
 		except Exception as e:
-			print(e)
 			return(e,False)
 	else:
-		print("dasf")
 		return ("File not found error: "+path,False)
 	
