@@ -11,7 +11,6 @@ from .utils import youtube as yt
 import requests
 from .utils import stt,convert,garbagecollector
 
-
 dirname = os.path.dirname(__file__)
 
 def process_audio(in_data, frame_count, time_info, status):
@@ -46,7 +45,6 @@ def pipeline(path,file_type='local'):
 		if status == True:
 			return (cc,True)
 		# Else send to voice to text conversion
-		print("Retrieving file")
 		v_id,status = yt.get_youtube_audio(path)
 		if status == False:
 			return ("Error: Could not get text: "+str(v_id),False)
@@ -56,11 +54,37 @@ def pipeline(path,file_type='local'):
 			if status:
 				print(error)
 				garbagecollector.dump(dirname + '/temp/'+v_id+'.mp3')
+				garbagecollector.dump(dirname+'/temp/'+v_id+'.wav')
 				return (error,True)
 			else:
 				return (error,False)
 		else:
 			return (error,False)
+	else:
+		if not os.path.isfile(path):
+			return ("File does not exist", False)
+		try:
+			error,status = convert.rectify(path)
+			if status == False:
+				return (error,status)
+			filepath = error
+			error,status = stt.speech_to_text(filepath)
+			if status:
+				return (error,True)
+			else:
+				return (error,False)
+		except Exception as e:
+			return (e,False)
+		finally: 
+			try:
+				if 'baritone/temp' in filepath:
+					garbagecollector.dump(filepath)
+			except:
+				print("Problems in main pipeline")
+
+
+
+
 
 
 # print(pipeline("https://www.youtube.com/watch?v=yIdKbSeAueY",'youtube'))

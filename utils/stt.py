@@ -64,12 +64,6 @@ def speech_to_text(path):
 		try:
 			fs, audio = wav.read(path)
 			processed_data = ds.stt(audio)
-			try:
-				gc.dump(path)
-				print("Deleted")
-			except Exception as e:
-				print(e)
-
 			return (processed_data,True)	
 		except Exception as e:
 			return(e,False)

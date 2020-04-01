@@ -14,11 +14,12 @@ dirname = path.dirname(path.dirname(__file__))
 sample_rate = 16000
 
 
-def mp3_to_wav(src):
+def mp3_to_wav(src,dst = ''):
     try:
         name = src.split('/')[-1].split('.')[0]
-        dst = "%s.wav"%(name)
-        dst = dirname+'/temp/'+dst
+        if not dst:
+            dst = "%s.wav"%(name)
+            dst = dirname+'/temp/'+dst
         try:                                                          
             sound = AudioSegment.from_mp3(src)
             sound.export(dst, format="wav")
@@ -26,9 +27,8 @@ def mp3_to_wav(src):
             sound = sound.set_channels(1)
             sound = sound.set_frame_rate(sample_rate)
             sound.export(dst, format="wav")
-            return ("Converted to wav", True)
+            return (dst, True)
         except Exception as e:
-            print(e)
             return ("Error converting file: "+e,False)
     except Exception as e:
         return (e,False)
@@ -39,8 +39,21 @@ def mp4_to_wav(src):
         return ('File is not in required format!',False)
     try:
         src = src.split('.mp4')[0]
-        command = "ffmpeg -i %s.mp4 -ab 160k -ac 2 -ar 44100 -vn %s.wav"%(src)
+        command = "ffmpeg -i %s.mp4 -ab 160k -ac 1 -ar 16000 -vn %s.wav"%(src)
         subprocess.call(command, shell=True)
         return ('Complete',True)
     except Exception as e:
         return (e,False)
+
+def rectify(path):
+    ext =  path.split('.')[-1]
+    if ext == 'wav':
+        return (path,True)
+    elif ext == 'mp3':
+        try:
+            error, status = mp3_to_wav(path)
+            return (error,status)
+        except Exception as e:
+            return (e,False)
+    elif ext == 'mp4':
+        return True
