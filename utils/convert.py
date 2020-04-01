@@ -10,21 +10,26 @@ from pydub import AudioSegment
 import pafy  
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_dl import YoutubeDL
+dirname = path.dirname(path.dirname(__file__))
+sample_rate = 16000
 
 
 def mp3_to_wav(src):
     try:
-        try:
-            name = path.split('.')[0]
-        except:
-            return ('File name error',False)
+        name = src.split('/')[-1].split('.')[0]
         dst = "%s.wav"%(name)
+        dst = dirname+'/temp/'+dst
         try:                                                          
             sound = AudioSegment.from_mp3(src)
             sound.export(dst, format="wav")
-            return ("Complete",True)
-        except:
-            return ("Error converting file",False)
+            sound = AudioSegment.from_wav(dst)
+            sound = sound.set_channels(1)
+            sound = sound.set_frame_rate(sample_rate)
+            sound.export(dst, format="wav")
+            return ("Converted to wav", True)
+        except Exception as e:
+            print(e)
+            return ("Error converting file: "+e,False)
     except Exception as e:
         return (e,False)
 

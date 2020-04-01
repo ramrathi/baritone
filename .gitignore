@@ -1,1 +1,4 @@
-models/output_graph.pbmm
+*.binary
+temp/
+*.mp3
+*.wav

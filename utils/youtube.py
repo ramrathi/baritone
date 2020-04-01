@@ -5,11 +5,12 @@ import numpy as np
 import pyaudio
 import time
 import wave
-from os import path
+import os
 from pydub import AudioSegment
 import pafy  
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_dl import YoutubeDL
+
 
 def get_youtube_cc(url):
     try:
@@ -21,11 +22,11 @@ def get_youtube_cc(url):
            captions+=(' '+line['text'])
         return (captions,True)
     except Exception as e:
-        print(e)
-        return ("Can't fetch from youtube",False)
+        return ("Can't fetch from youtube captions",False)
 
 def get_youtube_audio(url):
     try:
+        dirname = os.path.dirname(os.path.dirname(__file__))
         video_ids = [url.split('?v=')[1]]
         id = video_ids[0]
         ydl_opts = {
@@ -35,7 +36,7 @@ def get_youtube_audio(url):
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'outtmpl': '%(id)s.%(etx)s',
+        'outtmpl': dirname+'/temp/%(id)s.%(etx)s',
         'quiet': False
         }
         ydl = YoutubeDL(ydl_opts)
