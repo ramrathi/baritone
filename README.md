@@ -8,7 +8,7 @@ A ready-to-use, voice to text, wrapper library based on a pretrained version of 
 What I plan on doing (and have done): 
 - Direct Youtube video-to-text support
 - Local MP3,MP4,WAV,M4A files supported
-- Caching to prevent redoing urls you've already processed
+- Ultimate caching using audio fingerprinting so that if the system has heard something before, it doesn't have to go throught the whole proccess again and just retrieves from the DB. (Thanks [Dejavu](https://github.com/worldveil/dejavu) )
 - Automatic download and setup of pretrained model
 - Real time audio stream compatible
 - A no-bullshit library, that you can just import and run state of the art voice to text in, without worrying about the hassles of file conversions, downloads, pretrained/training models, etc.
