@@ -10,3 +10,16 @@ youtube-dl==2020.3.8
 youtube-transcript-api==0.3.1
 pafy==0.5.4
 pydub==0.23.1
+
+cycler==0.10.0
+kiwisolver==1.0.1
+matplotlib==2.2.2
+modernize==0.6.1
+mysql-connector-python==8.0.11
+protobuf==3.6.0
+pyparsing==2.2.0
+python-dateutil==2.7.3
+pytz==2018.5
+six==1.11.0
+SQLAlchemy==1.2.9
+sqlalchemy_utils

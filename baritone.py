@@ -4,15 +4,33 @@ import scipy.io.wavfile as wav
 import sys
 import os
 import numpy as np 
-# import pyaudio
 import time
 import wave
 import requests
 dirname = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(dirname)
+from dejavu import Dejavu
+from dejavu.recognize import FileRecognizer
 import utils
 import utils.youtube as yt
 import utils.database as db
+
+
+DEJAVU_THRESHOLD = 1000
+
+def check_dejavu(path):
+
+	dburl = 'sqlite:///new.db'
+	djv = Dejavu(dburl=dburl)
+	recognizer = FileRecognizer(djv)
+	song = recognizer.recognize_file(path)
+	if song['confidence'] < DEJAVU_THRESHOLD:
+		return ("Not found",False)
+	return (song['song_id'],True)
+
+def getDejavuText(song_id):
+	# return(db.getSongId(song_id))
+	return ("hello testing",True)
 
 def process_audio(in_data, frame_count, time_info, status):
 	global text_so_far
@@ -51,10 +69,20 @@ def pipeline(path,file_type='local'):
 		if status == True:
 			db.cache(path,cc)
 			return (cc,True)
+
 		# Else send to voice to text conversion
 		v_id,status = yt.get_youtube_audio(path)
 		if status == False:
 			return ("Error: Could not get text: "+str(v_id),False)
+		
+		# Checking for dejavu cache
+		song_id,status = check_dejavu(path)
+		if status == True:
+			text,status = getDejavuText(song_id)
+			if status == True:
+				return (text,True)
+		
+		# Continue with normal process
 		error,status = convert.mp3_to_wav(dirname + '/temp/'+v_id+'.mp3')
 		if status == True:
 			error,status = stt.speech_to_text(dirname+'/temp/'+v_id+'.wav')
@@ -91,12 +119,6 @@ def pipeline(path,file_type='local'):
 				print("Problems in main pipeline")
 
 
-
-
-
-
-# print(pipeline("https://www.youtube.com/watch?v=yIdKbSeAueY",'youtube'))
-
 # audio = pyaudio.PyAudio()
 # stream = audio.open(
 #     format=pyaudio.paInt16,
@@ -106,10 +128,6 @@ def pipeline(path,file_type='local'):
 #     frames_per_buffer=1024,
 #     stream_callback=process_audio
 # )
-
-# print('Please start speaking, when done press Ctrl-C ...')
-# stream.start_stream()
-
 # try: 
 #     while stream.is_active():
 #         time.sleep(0.1)
@@ -122,3 +140,4 @@ def pipeline(path,file_type='local'):
 #     # DeepSpeech
 #     text = model.finishStream(context)
 #     print('Final text = {}'.format(text))
+
