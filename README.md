@@ -20,4 +20,3 @@ What I plan on doing (and have done):
 Feel free to:
 - Add support for popular podcast platforms
 - Add more file type compatibilty
-- Add some sort of a caching system. Have been thinking of trying this out but I doubt I'll ever get to it, but basically trying to index audio files somehow such that you can reduce the usage of resources if you've come across a certain audio segment before. (URL and file caching is easy, wanted something that works irrespective of that)
