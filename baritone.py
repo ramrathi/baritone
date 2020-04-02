@@ -4,14 +4,15 @@ import scipy.io.wavfile as wav
 import sys
 import os
 import numpy as np 
-import pyaudio
+# import pyaudio
 import time
 import wave
-from .utils import youtube as yt
 import requests
-from .utils import stt,convert,garbagecollector,database as db
-
-dirname = os.path.dirname(__file__)
+dirname = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(dirname)
+import utils
+import utils.youtube as yt
+import utils.database as db
 
 def process_audio(in_data, frame_count, time_info, status):
 	global text_so_far
@@ -21,7 +22,7 @@ def process_audio(in_data, frame_count, time_info, status):
 	if text != text_so_far:
 		print('Interim text = {}'.format(text))
 		text_so_far = text
-	return (in_data, pyaudio.paContinue)
+	return (in_data)
 
 def validate_url(url):
 	try:

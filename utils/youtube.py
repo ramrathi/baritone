@@ -2,7 +2,7 @@ import subprocess
 import scipy.io.wavfile as wav
 import sys
 import numpy as np 
-import pyaudio
+# import pyaudio
 import time
 import wave
 import os
@@ -11,6 +11,8 @@ import pafy
 from youtube_transcript_api import YouTubeTranscriptApi
 from youtube_dl import YoutubeDL
 
+dirname = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(dirname)
 
 def get_youtube_cc(url):
     try:

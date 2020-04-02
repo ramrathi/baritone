@@ -1,6 +1,8 @@
 import sqlite3
 import os
+import sys
 dirname = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(dirname)
 
 def create_database():
 	try:
@@ -19,7 +21,7 @@ def check_cache(link):
 		c.execute("select converted from youtube where link = '%s'"%(link))
 		converted = c.fetchall()
 		if converted:
-			return (converted,True)
+			return (converted[0][0],True)
 		else:
 			return("Not found",False)
 	except Exception as e:

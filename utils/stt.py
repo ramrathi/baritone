@@ -3,7 +3,10 @@ import scipy.io.wavfile as wav
 import sys
 import os
 import wave
-import baritone.utils.garbagecollector as gc
+dirname = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(dirname)
+dirname2 = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import garbagecollector as gc
 
 sample_rate = 16000
 beam_width = 500
@@ -12,11 +15,10 @@ lm_beta = 1.85
 n_features = 26
 n_context = 9
 
-dirname = os.path.dirname(os.path.dirname(__file__))
-model_name = dirname+"/models/output_graph.pbmm"
-alphabet = dirname+"/models/alphabet.txt"
-langauage_model = dirname+"/models/lm.binary"
-trie = dirname+"/models/trie"
+model_name = dirname2+"/models/output_graph.pbmm"
+alphabet = dirname2+"/models/alphabet.txt"
+langauage_model = dirname2+"/models/lm.binary"
+trie = dirname2+"/models/trie"
 
 ds = Model(model_name,beam_width)
 try:
